@@ -42,6 +42,8 @@ export type PaymentStatus =
   | 'failed'
   | 'refunded';
 
+export type OrderStatus = 'pending' | 'confirmed' | 'expired';
+
 export type PipelineStage = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export const PIPELINE_STAGE_LABELS: Record<PipelineStage, string> = {
@@ -133,6 +135,29 @@ export type Payment = {
   amount_eur: number;
   credits_granted: number;
   status: PaymentStatus;
+  created_at: string;
+};
+
+export type Product = {
+  id: string;
+  analysis_id: string;
+  title: string;
+  subject: string;
+  description: string;
+  price_eur: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Order = {
+  id: string;
+  product_id: string;
+  customer_email: string;
+  status: OrderStatus;
+  download_token: string | null;
+  download_token_expires_at: string | null;
+  confirmed_at: string | null;
   created_at: string;
 };
 
@@ -319,6 +344,37 @@ export type Database = {
         Update: Partial<Omit<Payment, 'id'>>;
         Relationships: [];
       };
+      products: {
+        Row: Product;
+        Insert: {
+          id?: string;
+          analysis_id: string;
+          title: string;
+          subject: string;
+          description?: string;
+          price_eur: number;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<Product, 'id'>>;
+        Relationships: [];
+      };
+      orders: {
+        Row: Order;
+        Insert: {
+          id?: string;
+          product_id: string;
+          customer_email: string;
+          status?: OrderStatus;
+          download_token?: string | null;
+          download_token_expires_at?: string | null;
+          confirmed_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Omit<Order, 'id'>>;
+        Relationships: [];
+      };
     };
     Views: Record<string, unknown>;
     Functions: Record<string, unknown>;
@@ -329,6 +385,7 @@ export type Database = {
       chunk_category: ChunkCategory;
       user_tier: UserTier;
       payment_status: PaymentStatus;
+      order_status: OrderStatus;
     };
     CompositeTypes: Record<string, unknown>;
   };
@@ -374,4 +431,12 @@ export type AnalysisFullDetails = Analysis & {
   })[];
   session: Session;
   profile: Profile | null;
+};
+
+export type ProductWithAnalysis = Product & {
+  analyses: Analysis;
+};
+
+export type OrderWithProduct = Order & {
+  products: Product;
 };

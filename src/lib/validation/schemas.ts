@@ -50,3 +50,37 @@ export const authCallbackSchema = z.object({
 export const exportQuerySchema = z.object({
   analysisId: z.string().uuid(),
 });
+
+// Admin login
+export const adminLoginSchema = z.object({
+  password: z.string().min(1),
+});
+
+// POST /api/admin/products
+export const createProductSchema = z.object({
+  title: z.string().min(1).max(200),
+  subject: z.string().min(1).max(100),
+  description: z.string().max(2000).optional().default(""),
+  price_eur: z.number().positive().max(999),
+  documentIds: z.array(z.string().uuid()).min(1).max(50),
+});
+
+// PATCH /api/admin/products/[id]
+export const updateProductSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  subject: z.string().min(1).max(100).optional(),
+  description: z.string().max(2000).optional(),
+  price_eur: z.number().positive().max(999).optional(),
+  is_published: z.boolean().optional(),
+});
+
+// POST /api/orders
+export const createOrderSchema = z.object({
+  product_id: z.string().uuid(),
+  customer_email: z.string().email().max(254),
+});
+
+// POST /api/admin/orders/[id]/confirm
+export const confirmOrderSchema = z.object({
+  orderId: z.string().uuid(),
+});

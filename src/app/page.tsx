@@ -1,7 +1,3 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   BookOpen,
   Brain,
@@ -10,112 +6,56 @@ import {
   Layers,
   Sparkles,
 } from "lucide-react";
-import { UploadZone } from "@/components/upload/UploadZone";
-import { FileList } from "@/components/upload/FileList";
-import { Button } from "@/components/shared";
-import { useUpload } from "@/hooks/useUpload";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { ProductCard } from "@/components/catalog/ProductCard";
+import type { Product } from "@/types";
 
-export default function Home() {
-  const router = useRouter();
-  const {
-    files,
-    isUploading,
-    error,
-    addFiles,
-    removeFile,
-    setDocType,
-    upload,
-  } = useUpload();
-  const [isStarting, setIsStarting] = useState(false);
+export const dynamic = "force-dynamic";
 
-  const handleStartAnalysis = async () => {
-    if (!files.length) return;
-    setIsStarting(true);
-
-    try {
-      const uploaded = await upload();
-      if (!uploaded.length) return;
-
-      const documentIds = uploaded.map((d) => d.id);
-
-      const response = await fetch("/api/analysis", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentIds }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Analyse konnte nicht gestartet werden");
-      }
-
-      const data = await response.json();
-      router.push(`/analyse/${data.analysisId}`);
-    } catch (err) {
-      console.error("Failed to start analysis:", err);
-    } finally {
-      setIsStarting(false);
-    }
-  };
+export default async function Home() {
+  const supabase = createAdminClient();
+  const { data: products } = await supabase
+    .from("products")
+    .select("*")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false });
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       {/* Hero */}
       <div className="mb-12 text-center">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700">
           <Sparkles className="h-4 w-4" />
-          KI-gestützte Prüfungsvorbereitung
+          KI-gestützte Klausurvorbereitung
         </div>
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
           Lerne smarter,{" "}
           <span className="text-indigo-600">nicht harder</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
-          Lade deine Vorlesungsunterlagen hoch und erhalte datenbasierte
-          Analysen, personalisierte Trainingsaufgaben und einen optimierten
-          Lernplan.
+          Fertige Klausurvorbereitungspakete mit KI-generierten Analysen,
+          Trainingsaufgaben, Lernplänen und Karteikarten für deine
+          MINT-Prüfungen.
         </p>
       </div>
 
-      {/* Upload Section */}
-      <div className="mb-8 space-y-6">
-        <UploadZone
-          onFilesAdded={addFiles}
-          disabled={isUploading || isStarting}
-        />
-
-        <FileList
-          files={files}
-          onRemove={removeFile}
-          onDocTypeChange={setDocType}
-        />
-
-        {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {files.length > 0 && (
-          <div className="flex justify-center">
-            <Button
-              size="lg"
-              onClick={handleStartAnalysis}
-              loading={isUploading || isStarting}
-              disabled={!files.length}
-            >
-              {isUploading
-                ? "Dateien werden hochgeladen..."
-                : isStarting
-                  ? "Analyse wird gestartet..."
-                  : `${files.length} ${files.length === 1 ? "Datei" : "Dateien"} analysieren`}
-            </Button>
-          </div>
-        )}
-      </div>
+      {/* Product Grid */}
+      {products && products.length > 0 ? (
+        <div className="mb-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {(products as Product[]).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      ) : (
+        <div className="mb-16 rounded-xl border border-gray-200 bg-white p-12 text-center">
+          <p className="text-lg text-gray-500">
+            Aktuell sind keine Produkte verfügbar. Schau bald wieder vorbei!
+          </p>
+        </div>
+      )}
 
       {/* Features */}
-      <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <FeatureCard
           icon={<Brain className="h-6 w-6" />}
           title="Themengewichtung"
