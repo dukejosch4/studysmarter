@@ -31,7 +31,6 @@ export async function submitPdf(
 ): Promise<MathpixSubmitResponse> {
   const headers = getHeaders();
   const {
-    conversionFormats = ["mmd"],
     enableTablesDetection = true,
     callbackUrl,
   } = options;
@@ -42,7 +41,6 @@ export async function submitPdf(
   if ("url" in input) {
     const payload: Record<string, unknown> = {
       url: input.url,
-      conversion_formats: { mmd: true },
       math_inline_delimiters: ["$", "$"],
       math_display_delimiters: ["$$", "$$"],
       enable_tables_fallback: enableTablesDetection,
@@ -60,7 +58,6 @@ export async function submitPdf(
     formData.append("file", blob, input.fileName);
 
     const optionsPayload: Record<string, unknown> = {
-      conversion_formats: { mmd: true },
       math_inline_delimiters: ["$", "$"],
       math_display_delimiters: ["$$", "$$"],
       enable_tables_fallback: enableTablesDetection,

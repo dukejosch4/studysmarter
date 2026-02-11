@@ -9,8 +9,6 @@ export type MathpixJobStatus =
   | "error";
 
 export type MathpixSubmitOptions = {
-  /** Conversion formats to request */
-  conversionFormats?: MathpixConversionFormat[];
   /** Enable alphabets detection (e.g., Greek, Cyrillic) */
   enableTablesDetection?: boolean;
   /** Include line data in results */
