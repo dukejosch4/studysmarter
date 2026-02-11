@@ -1,7 +1,6 @@
 "use client";
 
 import { CreditCard } from "lucide-react";
-import { Button } from "@/components/shared";
 
 type PayPalButtonProps = {
   amount?: number;
@@ -28,15 +27,15 @@ export function PayPalButton({
           {amount.toFixed(2)} EUR via PayPal
         </p>
       </div>
-      <Button
-        asChild
-        className="w-full"
+      <a
+        href={paypalMeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 active:bg-indigo-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
       >
-        <a href={paypalMeUrl} target="_blank" rel="noopener noreferrer">
-          <CreditCard className="mr-2 h-4 w-4" />
-          Mit PayPal bezahlen
-        </a>
-      </Button>
+        <CreditCard className="h-4 w-4" />
+        Mit PayPal bezahlen
+      </a>
     </div>
   );
 }
