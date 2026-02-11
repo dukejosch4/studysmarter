@@ -41,20 +41,23 @@ export async function executeStage2(
 
   for (const doc of documents) {
     try {
-      // Generate signed URL for Mathpix to access the PDF
-      const { data: signedData } = await supabase.storage
+      // Download PDF from Supabase Storage and send as buffer
+      // (Mathpix often cannot reach Supabase signed URLs)
+      const { data: fileData, error: downloadError } = await supabase.storage
         .from("uploads")
-        .createSignedUrl(doc.storage_path, 600); // 10 min URL
+        .download(doc.storage_path);
 
-      if (!signedData?.signedUrl) {
-        throw new Error(`Cannot create signed URL for ${doc.file_name}`);
+      if (downloadError || !fileData) {
+        throw new Error(`Cannot download ${doc.file_name}: ${downloadError?.message}`);
       }
+
+      const buffer = await fileData.arrayBuffer();
 
       // Submit to Mathpix
       const submitResult = await withRetry(
         () =>
           submitPdf(
-            { url: signedData.signedUrl },
+            { buffer, fileName: doc.file_name },
             { callbackUrl }
           ),
         { maxRetries: 2 }
