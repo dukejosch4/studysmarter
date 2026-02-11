@@ -84,12 +84,21 @@ export async function submitPdf(
     body,
   });
 
+  const responseText = await response.text();
+  console.log(`[Mathpix] Submit response (${response.status}):`, responseText);
+
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Mathpix submit failed (${response.status}): ${errorText}`);
+    throw new Error(`Mathpix submit failed (${response.status}): ${responseText}`);
   }
 
-  return response.json();
+  const parsed = JSON.parse(responseText) as MathpixSubmitResponse;
+
+  if (!parsed.pdf_id) {
+    throw new Error(`Mathpix submit returned no pdf_id: ${responseText}`);
+  }
+
+  console.log(`[Mathpix] Got pdf_id: ${parsed.pdf_id}`);
+  return parsed;
 }
 
 /**
@@ -100,19 +109,24 @@ export async function checkStatus(
 ): Promise<MathpixStatusResponse> {
   const headers = getHeaders();
 
+  console.log(`[Mathpix] Checking status for pdf_id: ${pdfId}`);
+  console.log(`[Mathpix] Using app_id: ${headers.app_id}`);
+
   const response = await fetch(`${MATHPIX_API_BASE}/pdf/${pdfId}`, {
     method: "GET",
     headers,
   });
 
+  const responseText = await response.text();
+  console.log(`[Mathpix] Status response (${response.status}):`, responseText);
+
   if (!response.ok) {
-    const errorText = await response.text();
     throw new Error(
-      `Mathpix status check failed (${response.status}): ${errorText}`
+      `Mathpix status check failed (${response.status}): ${responseText}`
     );
   }
 
-  return response.json();
+  return JSON.parse(responseText);
 }
 
 /**
