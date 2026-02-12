@@ -13,7 +13,7 @@ function getClient(): GoogleGenAI {
   return clientInstance;
 }
 
-export type GeminiModel = "gemini-2.0-flash" | "gemini-2.5-pro-preview-06-05";
+export type GeminiModel = "gemini-2.0-flash" | "gemini-2.5-pro";
 
 export type GenerateOptions = {
   model?: GeminiModel;
@@ -134,6 +134,6 @@ export function selectModel(
     case "topic-prioritization":
     case "exam-generation":
     case "study-plan":
-      return "gemini-2.5-pro-preview-06-05";
+      return "gemini-2.5-pro";
   }
 }
