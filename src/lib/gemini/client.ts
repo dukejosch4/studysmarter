@@ -48,7 +48,10 @@ export async function generate(
 
   if (responseSchema) {
     config.responseMimeType = "application/json";
-    config.responseJsonSchema = responseSchema;
+    // gemini-2.5-pro has strict schema nesting limits — only enforce schema on Flash
+    if (model === "gemini-2.0-flash") {
+      config.responseJsonSchema = responseSchema;
+    }
   }
 
   const response = await client.models.generateContent({
